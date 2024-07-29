@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 export const ButtonContainer = styled.div`
     display: unset;
     text-align: right;
@@ -15,19 +15,21 @@ export const ButtonStyled = styled.button<{
     fontSize: number | undefined;
 }>`
     background-color: #3bb2ea;
-    width: ${({ width }) => (width !== undefined ? `${width}px` : 'unset')};
-    height: ${({ height }) => (height !== undefined ? `${height}px` : 'unset')};
+    width: ${({ width }) => (width !== undefined ? `${width}px` : "unset")};
+    height: ${({ height }) => (height !== undefined ? `${height}px` : "unset")};
     border: none;
     color: white;
-    padding: ${({ padding }) => (padding !== undefined ? `${padding}px` : '50px')};
-    padding-top: ${({ paddingtop }) => (paddingtop !== undefined ? `${paddingtop}px` : '15px')};
-    padding-bottom: ${({ paddingbottom }) => (paddingbottom !== undefined ? `${paddingbottom}px` : '15px')};
-    padding-left: ${({ paddingleft }) => (paddingleft !== undefined ? `${paddingleft}px` : '10px')};
-    padding-right: ${({ paddingright }) => (paddingright !== undefined ? `${paddingright}px` : '10px')};
+    padding: ${({ padding }) => (padding !== undefined ? `${padding}px` : "50px")};
+    padding-top: ${({ paddingtop }) => (paddingtop !== undefined ? `${paddingtop}px` : "15px")};
+    padding-bottom: ${({ paddingbottom }) => (paddingbottom !== undefined ? `${paddingbottom}px` : "15px")};
+    padding-left: ${({ paddingleft }) => (paddingleft !== undefined ? `${paddingleft}px` : "10px")};
+    padding-right: ${({ paddingright }) => (paddingright !== undefined ? `${paddingright}px` : "10px")};
     text-align: center;
     text-decoration: none;
-    display: inline-block;
-    font-size: ${({ fontSize }) => (fontSize !== undefined ? `${fontSize}px` : '16px')};
+    display: inline-flex; /* inline-flex로 설정 */
+    align-items: center; /* 수직 중앙 정렬 */
+    justify-content: center; /* 수평 중앙 정렬 */
+    font-size: ${({ fontSize }) => (fontSize !== undefined ? `${fontSize}px` : "16px")};
     margin: 4px 2px;
     cursor: pointer;
     border-radius: 12px;
