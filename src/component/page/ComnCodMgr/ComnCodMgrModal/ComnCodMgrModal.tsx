@@ -36,11 +36,10 @@ export interface IComnCodMgrModalProps {
 
 export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpCod, setGrpCod }) => {
     const [modal, setModal] = useRecoilState(modalState);
-    const [comnCod, setComnCod] = useState<IComnCod>({});
-    const [detailComnCod, setDetailComnCod] = useState<IComnGrpCodModel>();
+    const [comnCod, setComnCod] = useState<IComnCod>();
 
     useEffect(() => {
-        if (modal) searchDetail(grpCod);
+        if (modal && grpCod) searchDetail(grpCod);
     }, [modal]);
 
     const searchDetail = (grpCod: string) => {
@@ -54,7 +53,7 @@ export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpC
         };
 
         axios(postAction).then((res: AxiosResponse<IDetailResponse>) => {
-            setDetailComnCod(res.data.comnGrpCodModel);
+            setComnCod(res.data.comnGrpCodModel);
         });
     };
 
@@ -75,8 +74,43 @@ export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpC
         });
     };
 
+    const handlerUpdate = () => {
+        const postAction: AxiosRequestConfig = {
+            method: "POST",
+            url: "/system/updateComnGrpCodJson.do",
+            data: comnCod,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        axios(postAction).then((res: AxiosResponse<IPostResponse>) => {
+            if (res.data.result === "SUCCESS") {
+                onPostSuccess();
+            }
+        });
+    };
+
+    const handlerDelete = () => {
+        const postAction: AxiosRequestConfig = {
+            method: "POST",
+            url: "/system/deleteComnGrpCodJson.do",
+            data: { grp_cod: grpCod },
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+
+        axios(postAction).then((res: AxiosResponse<IPostResponse>) => {
+            if (res.data.result === "SUCCESS") {
+                alert("삭제되었습니다.");
+                onPostSuccess();
+            }
+        });
+    };
+
     const cleanUp = () => {
-        setDetailComnCod(undefined);
+        setComnCod(undefined);
         setGrpCod("");
     };
 
@@ -96,7 +130,8 @@ export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpC
                                     onChange={(e) => {
                                         setComnCod({ ...comnCod, grp_cod: e.target.value });
                                     }}
-                                    defaultValue={detailComnCod?.grp_cod}
+                                    defaultValue={comnCod?.grp_cod}
+                                    readOnly={grpCod ? true : false}
                                 ></input>
                             </td>
                             <th>그룹 코드 명</th>
@@ -107,7 +142,7 @@ export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpC
                                     onChange={(e) => {
                                         setComnCod({ ...comnCod, grp_cod_nm: e.target.value });
                                     }}
-                                    defaultValue={detailComnCod?.grp_cod_nm}
+                                    defaultValue={comnCod?.grp_cod_nm}
                                 ></input>
                             </td>
                         </tr>
@@ -119,23 +154,24 @@ export const ComnCodMgrModal: FC<IComnCodMgrModalProps> = ({ onPostSuccess, grpC
                                     onChange={(e) => {
                                         setComnCod({ ...comnCod, grp_cod_eplti: e.target.value });
                                     }}
-                                    defaultValue={detailComnCod?.grp_cod_eplti}
+                                    defaultValue={comnCod?.grp_cod_eplti}
                                 ></input>
                             </td>
                         </tr>
                         <tr>
                             <th>사용 유무 *</th>
                             <td colSpan={3}>
-                                <input type="radio" name="useYn" value={"Y"} onChange={(e) => setComnCod({ ...comnCod, use_poa: e.target.value })} checked={detailComnCod?.use_poa === "Y"}></input>
+                                <input type="radio" name="useYn" value={"Y"} onChange={(e) => setComnCod({ ...comnCod, use_poa: e.target.value })} checked={comnCod?.use_poa === "Y"}></input>
                                 사용
-                                <input type="radio" name="useYn" value={"N"} onChange={(e) => setComnCod({ ...comnCod, use_poa: e.target.value })} checked={detailComnCod?.use_poa === "N"}></input>
+                                <input type="radio" name="useYn" value={"N"} onChange={(e) => setComnCod({ ...comnCod, use_poa: e.target.value })} checked={comnCod?.use_poa === "N"}></input>
                                 미사용
                             </td>
                         </tr>
                     </tbody>
                 </ComnCodMgrTableStyled>
                 <div className="btn-group">
-                    <Button onClick={handlerSave}>저장</Button>
+                    <Button onClick={!grpCod ? handlerSave : handlerUpdate}>{!grpCod ? "저장" : "수정"}</Button>
+                    {grpCod ? <Button onClick={handlerDelete}>삭제</Button> : null}
                     <Button
                         onClick={() => {
                             setModal(!modal);

@@ -9,6 +9,9 @@ import { ComnCodContext } from "../../../../api/provider/ComnCodMgrProvider";
 import { modalState } from "../../../../stores/modalState";
 import { useRecoilState } from "recoil";
 import { ComnCodMgrModal } from "../ComnCodMgrModal/ComnCodMgrModal";
+import { useNavigate } from "react-router-dom";
+import { postComnCodMgrApi } from "../../../../api/postComnCodMgrApi";
+import { ComnCodMgrApi } from "../../../../api/api";
 
 export interface IComnCodList {
     row_num: number;
@@ -33,30 +36,43 @@ export const ComnCodMgrMain = () => {
     const { searchKeyword } = useContext(ComnCodContext);
     const [modal, setModal] = useRecoilState(modalState);
     const [grpCod, setGrpCod] = useState<string>("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         searchComnCod();
     }, [searchKeyword]);
 
     // 검색 화면
-    const searchComnCod = (cpage?: number) => {
+    const searchComnCod = async (cpage?: number) => {
         cpage = cpage || 1;
 
         // axios.post('system/listComnGrpCodJson.do', { currentPage: cpage, pageSize: 5 });
-        const postAction: AxiosRequestConfig = {
-            method: "POST",
-            url: "/system/listComnGrpCodJson.do",
-            data: { ...searchKeyword, currentPage: cpage, pageSize: 5 },
-            headers: {
-                "Content-Type": "application/json",
-            },
-        };
+        // const postAction: AxiosRequestConfig = {
+        //     method: "POST",
+        //     url: "/system/listComnGrpCodJson.do",
+        //     data: { ...searchKeyword, currentPage: cpage, pageSize: 5 },
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //     },
+        // };
 
-        axios(postAction).then((res: AxiosResponse<ISearchComnCod>) => {
-            setComnCodList(res.data.listComnGrpCod);
-            setTotalCnt(res.data.totalCount);
-            setCurrentPage(cpage);
+        // axios(postAction).then((res: AxiosResponse<ISearchComnCod>) => {
+        //     setComnCodList(res.data.listComnGrpCod);
+        //     setTotalCnt(res.data.totalCount);
+        //     setCurrentPage(cpage);
+        // });
+
+        const postSearchComnCod = await postComnCodMgrApi<ISearchComnCod>(ComnCodMgrApi.listComnGrpCodJson, {
+            ...searchKeyword,
+            currentPage: cpage,
+            pageSize: 5,
         });
+
+        if (postSearchComnCod) {
+            setComnCodList(postSearchComnCod.listComnGrpCod);
+            setTotalCnt(postSearchComnCod.totalCount);
+            setCurrentPage(cpage);
+        }
     };
 
     const onPostSuccess = () => {
@@ -64,7 +80,8 @@ export const ComnCodMgrMain = () => {
         searchComnCod(currentPage);
     };
 
-    const handlerModal = (grpCod: string) => {
+    const handlerModal = (grpCod: string, e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        e.stopPropagation(); // tr을 눌렀을 때 발생하는 이벤트 제거
         setGrpCod(grpCod);
         setModal(!modal);
     };
@@ -103,7 +120,12 @@ export const ComnCodMgrMain = () => {
                         comnCodList.map((a) => {
                             return (
                                 // 해당 컴포넌트의 tr에 대한 식별할만한 유니크한 key 값이 필요하다.
-                                <tr key={a.grp_cod}>
+                                <tr
+                                    key={a.grp_cod}
+                                    onClick={() => {
+                                        navigate(a.grp_cod, { state: { grpCodNm: a.grp_cod_nm } });
+                                    }}
+                                >
                                     <StyledTd>{a.grp_cod}</StyledTd>
                                     <StyledTd>{a.grp_cod_nm}</StyledTd>
                                     <StyledTd>{a.grp_cod_eplti}</StyledTd>
@@ -111,8 +133,8 @@ export const ComnCodMgrMain = () => {
                                     <StyledTd>{fomatDate(a.fst_enlm_dtt)}</StyledTd>
                                     <StyledTd>
                                         <a
-                                            onClick={() => {
-                                                handlerModal(a.grp_cod);
+                                            onClick={(e) => {
+                                                handlerModal(a.grp_cod, e);
                                             }}
                                         >
                                             수정
